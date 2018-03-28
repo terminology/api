@@ -11,7 +11,6 @@ export let UserRouter = new Router({
 
 UserRouter.post('/', controller.createUser.bind(controller))
 
+UserRouter.get('/', controller.findUsers.bind(controller))
 
-UserRouter.get('/', async (ctx: Koa.Context) => {
-  ctx.body = 'Hello User!'
-})
+UserRouter.get('/:userId', controller.findUser.bind(controller))

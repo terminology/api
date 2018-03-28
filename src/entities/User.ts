@@ -1,4 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm'
+import ModelHelper from '../helpers/Model'
 
 @Entity({
   name: 'Users'
@@ -21,10 +22,19 @@ export class User {
     emailConfirmedAt?: Date
 
     @Column({ select: false })
-    emailConfirmationToken?: string
+    @ModelHelper.Transformer.Exclude()
+    emailConfirmationToken?: string = undefined
 
     @Column({ select: false })
-    passwordHash: string
+    @ModelHelper.Transformer.Exclude()
+    passwordHash?: string
+
+    @Column({ type: 'datetime', nullable: true })
+    passwordResetAt?: Date
+
+    @Column({ select: false })
+    @ModelHelper.Transformer.Exclude()
+    passwordResetToken?: string = ''
 
     @Column()
     enabled: boolean = false

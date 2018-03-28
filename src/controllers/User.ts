@@ -1,56 +1,102 @@
 
 import { Context } from 'koa'
-// import { Controller } from './Controller'
+import { Controller } from './Controller'
 import { UserService } from '../services/User'
 import { CreateUser, FindUser, FindUsers } from '../messages/User'
-import * as Transformer from 'class-transformer'
+import ModelHelper from '../helpers/Model'
 
-export class UserController {
+export class UserController extends Controller {
 
   userService: UserService
 
   constructor() {
-    // super()
+    super()
     this.userService = new UserService()
   }
 
-  async createUser(ctx: Context) {
+  /**
+   * Create a user.
+   *
+   * @param context Koa.Context The application context.
+   */
+  async createUser(context: Context) {
 
     // Validate request parameters.
-    if (ctx.user) {
-      ctx.throw(401, 'Cannot create a new user when logged in.')
+    if (context.user) {
+      context.throw(401, 'Cannot create a new user when logged in.')
     }
-    // else if (validator.isEmpty(ctx.body.name)) {
-    //   ctx.throw(422, 'Name is required.')
-    // }
-    // else if (validator.isEmpty(ctx.body.email)) {
-    //   ctx.throw(422, 'Email is required.')
-    // }
-    // else if (validator.isEmpty(ctx.body.password)) {
-    //   ctx.throw(422, 'Password is required.')
-    // }
-    // else if (validator.isEmpty(ctx.body.passwordConfirmation)) {
-    //   ctx.throw(422, 'Password confirmation is required.')
-    // }
-    // else if (!validator.isEmail(ctx.body.email)) {
-    //   ctx.throw(422, 'Email address is not valid.')
-    // }
-    // else if (!validator.equals(ctx.body.password, ctx.body.passwordConfirmation)) {
-    //   ctx.throw(422, 'Password confirmation does not match.')
-    // }
-console.log(ctx.request.body)
-    let message: CreateUser = Transformer.plainToClass(CreateUser, ctx.request.body as Object)
-console.log(message)
-    let errors = await message.validate()
 
+    // Marshall request body into message.
+    let message = CreateUser.fromJSON<CreateUser>(context.request.body)
+
+    // Validate the message.
+    let errors = await message.normalize().validate()
     if (errors.length) {
-      console.log(errors)
-      ctx.throw(422, errors.map(error => error.constraints))
+      this.handleValidationErrors(errors, context)
     }
 
-    let user = await this.userService.createUser(message, ctx)
+    // Create the user.
+    let user = await this.userService.createUser(message, context)
 
-    ctx.status = 201
-    ctx.body = user
+    // Send the response.
+    context.status = 201
+    context.type = 'application/json'
+    context.body = ModelHelper.Transformer.serialize(user)
+  }
+
+  async findUser(context: Context) {
+
+    if (!context.user) {
+      // context.throw(401, 'You must be signed in to perform that action.')
+    }
+
+    // Marshall request body into message.
+    let message = FindUser.fromJSON<FindUser>({ id: context.params.userId })
+
+    // Validate the message.
+    let errors = await message.normalize().validate()
+    if (errors.length) {
+      this.handleValidationErrors(errors, context)
+    }
+
+    // Find the user.
+    let user = await this.userService.findUser(message, context)
+
+    if (!user) {
+      context.throw(404, 'The requested user could not be found.')
+    }
+
+    // Send the response.
+    context.status = 200
+    context.type = 'application/json'
+    context.body = ModelHelper.Transformer.serialize(user)
+  }
+
+  async findUsers(context: Context) {
+
+    if (!context.user) {
+      // context.throw(401, 'You must be signed in to perform that action.')
+    }
+
+    // Marshall request body into message.
+    let message = FindUsers.fromJSON<FindUsers>(context.query)
+
+    // Validate the message.
+    let errors = await message.normalize().validate()
+    if (errors.length) {
+      this.handleValidationErrors(errors, context)
+    }
+
+    // Find the users.
+    let users = await this.userService.findUsers(message, context)
+
+    // Send the response.
+    context.status = 200
+    context.type = 'application/json'
+    context.body = ModelHelper.Transformer.serialize(users)
+  }
+
+  _buildFindUsersParams(context: Context) {
+    FindUsers.fromJSON<FindUsers>(context.query)
   }
 }

@@ -1,7 +1,7 @@
 
 import * as bcrypt from 'bcrypt'
 
-export async function hashPassword(plaintext, rounds): Promise<string> {
+export async function hashPassword(plaintext, rounds = 10): Promise<string> {
   return bcrypt.hash(plaintext, rounds)
 }
 

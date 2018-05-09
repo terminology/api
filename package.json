@@ -24,20 +24,25 @@
     "class-validator": "^0.8.1",
     "koa": "^2.4.1",
     "koa-bodyparser-ts": "^0.1.5",
+    "koa-requestid": "^2.0.1",
     "koa-response-time": "^2.0.0",
     "koa-router": "^7.4.0",
     "lodash": "^4.17.5",
     "mysql": "^2.15.0",
+    "natural": "^0.5.6",
     "reflect-metadata": "^0.1.12",
-    "typeorm": "^0.1.12",
+    "slug": "^0.9.1",
+    "typeorm": "^0.2.4",
     "uuid": "^3.2.1"
   },
   "devDependencies": {
     "@types/bcrypt": "^1.0.0",
     "@types/koa": "^2.0.44",
     "@types/koa-router": "^7.0.27",
-    "@types/lodash": "^4.14.101",
+    "@types/lodash": "^4.14.106",
+    "@types/natural": "^0.2.33",
     "@types/node": "^9.4.1",
+    "@types/slug": "^0.9.0",
     "@types/uuid": "^3.4.3",
     "@types/validator": "^6.3.0"
   }

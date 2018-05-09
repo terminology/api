@@ -1,102 +1,272 @@
-
+import * as Transformer from 'class-transformer'
+import * as lodash from 'lodash'
 import { Context } from 'koa'
-import { Controller } from './Controller'
-import { UserService } from '../services/User'
-import { CreateUser, FindUser, FindUsers } from '../messages/User'
-import ModelHelper from '../helpers/Model'
+import { OperationController } from './Operation'
+import * as ORM from 'typeorm'
+import { User } from '../entities/User'
+import * as Ops from '../operations/User'
 
-export class UserController extends Controller {
-
-  userService: UserService
-
-  constructor() {
-    super()
-    this.userService = new UserService()
-  }
+/**
+ * User controller.
+ */
+export class UserController extends OperationController {
 
   /**
    * Create a user.
    *
-   * @param context Koa.Context The application context.
+   * @param context The application context.
    */
-  async createUser(context: Context) {
+  public async create(context: Context) {
 
-    // Validate request parameters.
-    if (context.user) {
-      context.throw(401, 'Cannot create a new user when logged in.')
-    }
+    // Build the options.
+    let options = this._buildCreateUserOptions(context)
 
-    // Marshall request body into message.
-    let message = CreateUser.fromJSON<CreateUser>(context.request.body)
-
-    // Validate the message.
-    let errors = await message.normalize().validate()
+    // Validate the options.
+    let errors = await this._validate(options)
     if (errors.length) {
-      this.handleValidationErrors(errors, context)
+      return this.handleValidationErrors(errors, context)
     }
 
-    // Create the user.
-    let user = await this.userService.createUser(message, context)
+    // Perform the operation in a transaction.
+    return ORM
+      .getConnection()
+      .transaction(async manager => {
 
-    // Send the response.
-    context.status = 201
-    context.type = 'application/json'
-    context.body = ModelHelper.Transformer.serialize(user)
+        // Create the user.
+        let created = await new Ops.CreateUser(options).execute(manager, context)
+
+        // Send the response.
+        return this.json(context, 201, created)
+      })
   }
 
-  async findUser(context: Context) {
+  /**
+   * Confirm a user email address.
+   *
+   * @param context The application context.
+   */
+  public async confirmEmail(context: Context) {
 
-    if (!context.user) {
-      // context.throw(401, 'You must be signed in to perform that action.')
-    }
+    // Build the options.
+    let options = this._buildConfirmUserEmailOptions(context)
 
-    // Marshall request body into message.
-    let message = FindUser.fromJSON<FindUser>({ id: context.params.userId })
-
-    // Validate the message.
-    let errors = await message.normalize().validate()
+    // Validate the options.
+    let errors = await this._validate(options)
     if (errors.length) {
-      this.handleValidationErrors(errors, context)
+      return this.handleValidationErrors(errors, context)
     }
 
-    // Find the user.
-    let user = await this.userService.findUser(message, context)
+    // Perform the operation in a transaction.
+    return ORM
+      .getConnection()
+      .transaction(async manager => {
 
-    if (!user) {
-      context.throw(404, 'The requested user could not be found.')
-    }
+        // Get the user.
+        let user = await new Ops.ConfirmUserEmail(options).execute(manager, context)
 
-    // Send the response.
-    context.status = 200
-    context.type = 'application/json'
-    context.body = ModelHelper.Transformer.serialize(user)
+        // Check if the user was found.
+        if (!user) {
+          context.throw(404, 'The requested user could not be found.')
+        }
+
+        // Send the response.
+        return this.json(context, 200, user)
+      })
   }
 
-  async findUsers(context: Context) {
+  /**
+   * Find users.
+   *
+   * @param context The application context.
+   */
+  public async find(context: Context) {
 
-    if (!context.user) {
-      // context.throw(401, 'You must be signed in to perform that action.')
-    }
+    // Build the options.
+    let options = this._buildFindUsersOptions(context)
 
-    // Marshall request body into message.
-    let message = FindUsers.fromJSON<FindUsers>(context.query)
-
-    // Validate the message.
-    let errors = await message.normalize().validate()
+    // Validate the options.
+    let errors = await this._validate(options)
     if (errors.length) {
-      this.handleValidationErrors(errors, context)
+      return this.handleValidationErrors(errors, context)
     }
 
-    // Find the users.
-    let users = await this.userService.findUsers(message, context)
+    // Perform the operation in a transaction.
+    return ORM
+      .getConnection()
+      .transaction(async manager => {
 
-    // Send the response.
-    context.status = 200
-    context.type = 'application/json'
-    context.body = ModelHelper.Transformer.serialize(users)
+        // Find the user.
+        let users = await new Ops.FindUsers(options).execute(manager, context)
+
+        // Send the response.
+        return this.json(context, 200, users)
+      })
   }
 
-  _buildFindUsersParams(context: Context) {
-    FindUsers.fromJSON<FindUsers>(context.query)
+  /**
+   * Get a user.
+   *
+   * @param context The application context.
+   */
+  public async get(context: Context) {
+
+    // Build the options.
+    let options = this._buildGetUserOptions(context)
+
+    // Validate the options.
+    let errors = await this._validate(options)
+    if (errors.length) {
+      return this.handleValidationErrors(errors, context)
+    }
+
+    // Perform the operation in a transaction.
+    return ORM
+      .getConnection()
+      .transaction(async manager => {
+
+        // Get the user.
+        let user = await new Ops.GetUser(options).execute(manager, context)
+
+        // Check if the user was found.
+        if (!user) {
+          context.throw(404, 'The requested user could not be found.')
+        }
+
+        // Send the response.
+        return this.json(context, 200, user)
+      })
+  }
+
+  /**
+   * Update a user.
+   *
+   * @param context The application context.
+   */
+  public async update(context: Context) {
+
+    // Build the options.
+    let options = this._buildUpdateUserOptions(context)
+
+    // Validate the options.
+    let errors = await this._validate(options)
+    if (errors.length) {
+      return this.handleValidationErrors(errors, context)
+    }
+
+    // Perform the operation in a transaction.
+    return ORM
+      .getConnection()
+      .transaction(async manager => {
+
+        // Get the user.
+        let user = await new Ops.UpdateUser(options).execute(manager, context)
+
+        // Check if the user was found.
+        if (!user) {
+          context.throw(404, 'The requested user could not be found.')
+        }
+
+        // Send the response.
+        return this.json(context, 200, user)
+      })
+  }
+
+  /**
+   * Build the options to create a user.
+   *
+   * @param context The application context.
+   *
+   * @return The options to create a user.
+   */
+  protected _buildCreateUserOptions(context: Context): Ops.CreateUserOptions {
+    return UserController.Transformer.plainToClass<Ops.CreateUserOptions, object>(
+      Ops.CreateUserOptions,
+      context.request.body,
+      this._buildTransformOptions(context)
+    )
+  }
+
+  /**
+   * Build the options to confirm a user email address.
+   *
+   * @param context The application context.
+   *
+   * @return The options to confirm a user email address.
+   */
+  protected _buildConfirmUserEmailOptions(context: Context): Ops.ConfirmUserEmailOptions {
+    return UserController.Transformer.plainToClass<Ops.ConfirmUserEmailOptions, object>(
+      Ops.ConfirmUserEmailOptions,
+      {
+        token: context.params.token
+      },
+      this._buildTransformOptions(context)
+    )
+  }
+
+  /**
+   * Build the options to get a user.
+   *
+   * @param context The application context.
+   *
+   * @return The options to get a user.
+   */
+  protected _buildGetUserOptions(context: Context): Ops.GetUserOptions {
+    return UserController.Transformer.plainToClass<Ops.GetUserOptions, object>(
+      Ops.GetUserOptions,
+      {
+        id: context.params.userId
+      },
+      this._buildTransformOptions(context)
+    )
+  }
+
+  /**
+   * Build the options to find a list of users.
+   *
+   * @param context The application context.
+   *
+   * @return The options to find a list of users.
+   */
+  protected _buildFindUsersOptions(context: Context): Ops.FindUsersOptions {
+    return UserController.Transformer.plainToClass<Ops.FindUsersOptions, object>(
+      Ops.FindUsersOptions,
+      {
+        skip: context.query.skip || 0,
+        take: context.query.take || 10,
+      },
+      this._buildTransformOptions(context)
+    )
+  }
+
+  /**
+   * Build the options to update a user.
+   *
+   * @param context The application context.
+   *
+   * @return The options to update a user.
+   */
+  protected _buildUpdateUserOptions(context: Context): Ops.UpdateUserOptions {
+    return UserController.Transformer.plainToClass<Ops.UpdateUserOptions, object>(
+      Ops.UpdateUserOptions,
+      Object.assign(
+        {},
+        context.request.body,
+        { id: context.params.userId }
+      ),
+      this._buildTransformOptions(context)
+    )
+  }
+
+  /**
+   * Build the options for the class transformer.
+   *
+   * @param context The application context.
+   *
+   * @return The transform options.
+   */
+  protected _buildTransformOptions(context: Context): Transformer.ClassTransformOptions {
+    return {
+      groups: context.user ? [ context.user.role ] : [ 'contributor' ]
+    }
   }
 }

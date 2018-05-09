@@ -5,7 +5,7 @@
    "username": "root",
    "password": "",
    "database": "Terminology",
-   "synchronize": true,
+   "synchronize": false,
    "logging": true,
    "entities": [
       "src/entities/**/*.ts"

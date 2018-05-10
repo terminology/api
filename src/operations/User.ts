@@ -67,18 +67,6 @@ export class CreateUserOptions {
   state?: UserState
 }
 
-/**
- * Options for creating a list of users.
- */
-export class CreateUsersOptions {
-
-  @Transformer.Expose({ groups: [ 'admin' ]})
-  @Validator.ValidateIf(o => !!o.state)
-  @Validator.IsEnum(UserState, {
-    message: 'State must be "pending", "active", or "deleted".'
-  })
-  state?: UserState
-}
 
 /**
  * Options for confirming a user email address.
@@ -162,22 +150,6 @@ export class FindUsersOptions extends FindUserOptions implements ORM.FindManyOpt
 }
 
 /**
- * Options for finding or creating a user.
- */
-export class FindCreateUserOptions {
-  find?: FindUserOptions
-  create: CreateUserOptions
-}
-
-/**
- * Options for finding or creating a list of users.
- */
-export class FindCreateUsersOptions {
-  find?: FindUsersOptions
-  create: CreateUsersOptions
-}
-
-/**
  * Options for getting a user.
  */
 export class GetUserOptions {
@@ -225,19 +197,6 @@ export class UpdateUserOptions extends GetUserOptions {
     message: 'Password cannot be more than 255 characters.'
   })
   password?: string
-
-  @Transformer.Expose({ groups: [ 'admin' ]})
-  @Validator.ValidateIf(o => !!o.state)
-  @Validator.IsEnum(UserState, {
-    message: 'State must be "pending", "active", or "deleted".'
-  })
-  state?: UserState
-}
-
-/**
- * Options for updating a list of users.
- */
-export class UpdateUsersOptions extends GetUsersOptions {
 
   @Transformer.Expose({ groups: [ 'admin' ]})
   @Validator.ValidateIf(o => !!o.state)
@@ -329,35 +288,6 @@ export class CreateUser extends Operation<CreateUserOptions, User> {
   }
 }
 
-// /**
-//  * Create a list of users.
-//  */
-// export class CreateUsers extends Operation<CreateUsersOptions, User[]> {
-//
-//   /**
-//    * Create a list of users.
-//    *
-//    * @param manager The entity manager.
-//    * @param context The application context.
-//    *
-//    * @return The created users.
-//    */
-//   protected async _execute(manager: ORM.EntityManager, context: Context): Promise<User[]> {
-//
-//     // Create the users.
-//     const users = this.options.names.map(name => {
-//       return manager.create(User, {
-//         state: this.options.state || UserState.Pending,
-//         createdAt: new Date(),
-//         // createdBy: context.user,
-//       })
-//     })
-//
-//     // Save the users.
-//     return manager.save(User, users)
-//   }
-// }
-
 /**
  * Authenticate a user.
  */
@@ -443,74 +373,6 @@ export class FindUsers extends Operation<FindUsersOptions, User[]> {
   }
 }
 
-// /**
-//  * Find or Create a user.
-//  */
-// export class FindCreateUser extends Operation<FindCreateUserOptions, User> {
-//
-//   /**
-//    * Find or create a user.
-//    *
-//    * @param manager The entity manager.
-//    * @param context The application context.
-//    *
-//    * @return The found/created user.
-//    */
-//   protected async _execute(manager: ORM.EntityManager, context: Context): Promise<User> {
-//
-//     // Try to find an existing user.
-//     let existing = await new FindUser(
-//       Object.assign({}, this.options.find, { where: { slug: slug } })
-//     ).execute(manager, context)
-//
-//     // Check if the user exists.
-//     if (existing) {
-//       return existing
-//     }
-//
-//     // Create the user.
-//     return new CreateUser(this.options.create).execute(manager, context)
-//   }
-// }
-
-// /**
-//  * Find or Create a list of users.
-//  */
-// export class FindCreateUsers<
-//   User,
-//   FO extends FindUsersOptions<User>,
-//   CO extends CreateUsersOptions<User>,
-//   O extends FindCreateUsersOptions<User, FO, CO>
-// > extends Operation<O, User[]> {
-//
-//   /**
-//    * Find or create a list of users.
-//    *
-//    * @param manager The entity manager.
-//    * @param context The application context.
-//    *
-//    * @return The found/created list of users.
-//    */
-//   protected async _execute(manager: ORM.EntityManager, context: Context): Promise<User[]> {
-//
-//     // Find the existing users.
-//     const existing = await new FindUsers({ where: { slug: ORM.In(lodash.keys(slugMap)) } }).execute(manager, context)
-//
-//     // Index existing users by slug.
-//     const existingMap = lodash.keyBy(existing, 'slug')
-//
-//     // Find the missing users by slug.
-//     const missingSlugs = lodash.difference(lodash.keys(slugMap), lodash.keys(existingMap))
-//     const missingUsers = lodash.values(lodash.pick(slugMap, missingSlugs))
-//
-//     // Create the missing users.
-//     const created = await new CreateUsers({ names: missingUsers }).execute(manager, context)
-//
-//     // Merge created and existing.
-//     return created.concat(existing)
-//   }
-// }
-
 /**
  * Get a user.
  */
@@ -585,8 +447,3 @@ export class UpdateUser extends Operation<UpdateUserOptions, User | undefined> {
     return manager.save(User, user)
   }
 }
-
-/**
- * Update a list of users.
- */
-// export class UpdateUsers<O extends UpdateUsersOptions<User>> extends Operation<O, User[]> {}

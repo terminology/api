@@ -58,6 +58,7 @@ export class CreateUserOptions {
   @Validator.MaxLength(255, {
     message: 'Password cannot be more than 255 characters.'
   })
+  @Transformer.Exclude({ toPlainOnly: true })
   password: string
 
   @Transformer.Expose({ groups: [ 'admin' ]})
@@ -197,6 +198,7 @@ export class UpdateUserOptions extends GetUserOptions {
   @Validator.MaxLength(255, {
     message: 'Password cannot be more than 255 characters.'
   })
+  @Transformer.Exclude({ toPlainOnly: true })
   password?: string
 
   @Transformer.Expose({ groups: [ 'admin' ]})
@@ -219,8 +221,7 @@ export class AuthenticateUser extends Operation<AuthenticateUserOptions, User | 
   /**
    * Instantiate the operation.
    *
-   * @param options     The operation options.
-   * @param constructor The operation options constructor.
+   * @param options The operation options.
    */
   constructor(options: AuthenticateUserOptions) {
     super(options, AuthenticateUserOptions)
@@ -268,6 +269,15 @@ export class AuthenticateUser extends Operation<AuthenticateUserOptions, User | 
  * Create a user.
  */
 export class CreateUser extends Operation<CreateUserOptions, User> {
+
+  /**
+   * Instantiate the operation.
+   *
+   * @param options The operation options.
+   */
+  constructor(options: CreateUserOptions) {
+    super(options, CreateUserOptions)
+  }
 
   /**
    * Create a user.
@@ -424,6 +434,15 @@ export class GetUsers extends Operation<GetUsersOptions, User[]> {
  * Update a user.
  */
 export class UpdateUser extends Operation<UpdateUserOptions, User | undefined> {
+
+  /**
+   * Instantiate the operation.
+   *
+   * @param options The operation options.
+   */
+  constructor(options: UpdateUserOptions) {
+    super(options, UpdateUserOptions)
+  }
 
   /**
    * Update a user.

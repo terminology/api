@@ -28,7 +28,7 @@ export async function AuthenticationMiddleware(context: Context, next: Function)
           let user = await new Ops.AuthenticateUser({ email: email, password: password }).execute(manager, context)
 
           if (!user) {
-            context.throw(401, 'Invalid email address and password.')
+            context.throw(401, new Error('Invalid email address and password.'))
           }
 
           return user

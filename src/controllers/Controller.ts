@@ -26,11 +26,16 @@ export class Controller {
     context.body = Controller.Transformer.serialize(body)
   }
 
+  /**
+   * Handle validation errors.
+   *
+   * @param errors One or more validation errors.
+   * @param ctx    The application context.
+   */
   protected handleValidationErrors(errors: Validator.ValidationError[], ctx: Context) {
-    console.log(errors)
-    console.log('here?')
-    ctx.throw(422, 'Nope', { foobar: 'Testing' })
-    ctx.type = 'application/json'
+
+    // TODO: This should do something more useful with the error messages.
+    ctx.throw(422, errors[0])
   }
 
   /**

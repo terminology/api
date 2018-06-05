@@ -66,7 +66,7 @@ export class UserController extends OperationController {
 
         // Check if the user was found.
         if (!user) {
-          context.throw(404, 'The requested user could not be found.')
+          context.throw(404, new Error('The requested user could not be found.'))
         }
 
         // Send the response.
@@ -129,7 +129,7 @@ export class UserController extends OperationController {
 
         // Check if the user was found.
         if (!user) {
-          context.throw(404, 'The requested user could not be found.')
+          context.throw(404, new Error('The requested user could not be found.'))
         }
 
         // Send the response.
@@ -163,7 +163,7 @@ export class UserController extends OperationController {
 
         // Check if the user was found.
         if (!user) {
-          context.throw(404, 'The requested user could not be found.')
+          context.throw(404, new Error('The requested user could not be found.'))
         }
 
         // Send the response.

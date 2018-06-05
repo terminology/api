@@ -96,7 +96,7 @@ export abstract class ContentController<
 
     // Check if the controller supports the operation.
     if (!this.createOneOptions || !this.createOne) {
-      context.throw(403, 'The requested operation is not supported.')
+      context.throw(403, new Error('The requested operation is not supported.'))
     }
 
     // Build the options.
@@ -130,7 +130,7 @@ export abstract class ContentController<
 
     // Check if the controller supports the operation.
     if (!this.findManyOptions || !this.findMany) {
-      context.throw(403, 'The requested operation is not supported.')
+      context.throw(403, new Error('The requested operation is not supported.'))
     }
 
     // Build the options.
@@ -164,7 +164,7 @@ export abstract class ContentController<
 
     // Check if the controller supports the operation.
     if (!this.getOneOptions || !this.getOne) {
-      context.throw(403, 'The requested operation is not supported.')
+      context.throw(403, new Error('The requested operation is not supported.'))
     }
 
     // Build the options.
@@ -186,7 +186,7 @@ export abstract class ContentController<
 
         // Check if the content was found.
         if (!content) {
-          context.throw(404, 'The requested content could not be found.')
+          context.throw(404, new Error('The requested content could not be found.'))
         }
 
         // Send the response.
@@ -203,7 +203,7 @@ export abstract class ContentController<
 
     // Check if the controller supports the operation.
     if (!this.updateOneOptions || !this.updateOne) {
-      context.throw(403, 'The requested operation is not supported.')
+      context.throw(403, new Error('The requested operation is not supported.'))
     }
 
     // Build the options.
@@ -225,7 +225,7 @@ export abstract class ContentController<
 
         // Check if the content was found.
         if (!content) {
-          context.throw(404, 'The requested content could not be found.')
+          context.throw(404, new Error('The requested content could not be found.'))
         }
 
         // Send the response.

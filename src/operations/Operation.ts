@@ -4,6 +4,10 @@ import { Context } from 'koa'
 import * as ORM from 'typeorm'
 import { Event } from '../entities/Event'
 
+export type ObjectType<T> = {
+  new(): T
+}
+
 /**
  * Check if an object is an operation.
  *
@@ -28,9 +32,13 @@ export abstract class Operation<O, T> {
   /**
    * Instantiate the operation.
    *
-   * @param options The operation options.
+   * @param options     The operation options.
+   * @param constructor The operation options constructor.
    */
-  constructor(options: O) {
+  constructor(options: O, constructor?: ObjectType<O>) {
+    if (constructor && !(options instanceof constructor)) {
+      options = Transformer.plainToClass(constructor, options)
+    }
     this.options = options || {}
   }
 
@@ -46,10 +54,13 @@ export abstract class Operation<O, T> {
    */
   public async execute(manager: ORM.EntityManager, context: Context): Promise<T> {
 
+    // Transform the options to remove sensitive data.
+    const cleanOptions = Transformer.classToPlain(this.options)
+
     // Create an event to record the operation.
     let event = manager.create(Event, {
       type: this.constructor.name,
-      options: this.options as {},
+      options: cleanOptions,
       createdAt: new Date(),
       createdBy: context.user
     })

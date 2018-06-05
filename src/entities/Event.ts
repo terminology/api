@@ -13,7 +13,7 @@ export class Event {
     type: string
 
     @Column({ type: 'simple-json', default: {} })
-    options: {}
+    options: Object
 
     @Column({ type: 'datetime' })
     createdAt: Date

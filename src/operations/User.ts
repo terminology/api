@@ -27,6 +27,7 @@ export class AuthenticateUserOptions {
   @Validator.MaxLength(255, {
     message: 'Password cannot be more than 255 characters.'
   })
+  @Transformer.Exclude({ toPlainOnly: true })
   password: string
 }
 
@@ -214,6 +215,16 @@ export class UpdateUserOptions extends GetUserOptions {
  * Authenticate a user.
  */
 export class AuthenticateUser extends Operation<AuthenticateUserOptions, User | undefined> {
+
+  /**
+   * Instantiate the operation.
+   *
+   * @param options     The operation options.
+   * @param constructor The operation options constructor.
+   */
+  constructor(options: AuthenticateUserOptions) {
+    super(options, AuthenticateUserOptions)
+  }
 
   /**
    * Authenticate a user.

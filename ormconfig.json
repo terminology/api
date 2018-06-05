@@ -10,6 +10,7 @@
    "entities": [
       "src/entities/**/*.ts"
    ],
+   "migrationsTableName": "Migrations",
    "migrations": [
       "src/migrations/**/*.ts"
    ],

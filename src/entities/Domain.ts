@@ -10,5 +10,11 @@ export class Domain extends Content {
   name: string
 
   @Column()
-  prefix: string
+  slug: string
+
+  @Column({ type: 'tinytext' })
+  summary: string
+  
+  @Column()
+  private: boolean
 }

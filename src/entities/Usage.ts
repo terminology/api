@@ -13,6 +13,9 @@ export class Usage extends Content {
   @Column()
   slug: string
 
+  @Column({ type: 'tinytext' })
+  summary: string
+
   @OneToMany(type => Connection, connection => connection.usage)
   connections: Connection[]
 }

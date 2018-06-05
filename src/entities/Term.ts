@@ -1,6 +1,3 @@
-import * as natural from 'natural'
-import * as slug from 'slug'
-slug.defaults.mode = 'rfc3986'
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany, ManyToOne, ManyToMany, JoinTable } from 'typeorm'
 import { Content } from './Content'
 import { Connection } from './Connection'
@@ -14,7 +11,6 @@ export enum POS {
 @Entity({
   name: 'Terms'
 })
-// @Index("state_slug_unique", (term: Term) => [ term.state, term.slug ], { unique: true })
 export class Term extends Content {
 
   @Column()

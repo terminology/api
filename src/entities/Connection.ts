@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToOne, JoinColumn } from 'typeorm'
+import { Entity, PrimaryGeneratedColumn, Column, OneToOne, JoinColumn, RelationId } from 'typeorm'
 import { Content } from './Content'
 import { Term } from './Term'
 import { Usage } from './Usage'
@@ -12,9 +12,15 @@ export class Connection extends Content {
   @JoinColumn()
   term: Term
 
+  @RelationId((connection: Connection) => connection.term)
+  termId: number
+
   @OneToOne(type => Usage)
   @JoinColumn()
   usage: Usage
+
+  @RelationId((connection: Connection) => connection.usage)
+  usageId: number
 
   @Column()
   weight: number = 0

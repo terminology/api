@@ -3,6 +3,7 @@ import 'reflect-metadata'
 import * as Koa from 'koa'
 import * as Router from 'koa-router'
 import bodyParser from 'koa-bodyparser-ts'
+import * as cors from '@koa/cors';
 import * as responseTime from 'koa-response-time'
 import * as requestId from 'koa-requestid'
 import { createConnection } from 'typeorm'
@@ -13,6 +14,9 @@ import { AuthenticationMiddleware } from './middleware/Authentication'
 createConnection().then(async connection => {
   const api = new Koa()
 
+  api.use(cors({
+    credentials: true
+  }))
   api.use(requestId({
     header: false,
     query: false

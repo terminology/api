@@ -19,6 +19,7 @@
   },
   "license": "UNLICENSED",
   "dependencies": {
+    "@koa/cors": "^2.2.1",
     "bcrypt": "^1.0.3",
     "class-transformer": "^0.1.9",
     "class-validator": "^0.8.1",

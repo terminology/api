@@ -4,8 +4,8 @@ import * as Koa from 'koa'
 import * as Router from 'koa-router'
 import bodyParser from 'koa-bodyparser-ts'
 import * as cors from '@koa/cors';
-import * as responseTime from 'koa-response-time'
-import * as requestId from 'koa-requestid'
+import responseTime = require('koa-response-time') // Lame
+import * as requestId from 'koa-requestid' // No type def.
 import { createConnection } from 'typeorm'
 import { routes } from './routes'
 import { AuthenticationMiddleware } from './middleware/Authentication'

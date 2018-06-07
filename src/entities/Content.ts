@@ -15,6 +15,17 @@ export enum ContentAction {
   View = 'view'
 }
 
+/**
+ * Check if an object is a content.
+ *
+ * @param input The object to check.
+ *
+ * @return True if the object is a content, false otherwise.
+ */
+export function isContent(input: any): input is Content {
+  return input instanceof Content
+}
+
 export abstract class Content {
 
   @PrimaryGeneratedColumn()

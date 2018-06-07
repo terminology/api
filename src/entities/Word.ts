@@ -1,6 +1,17 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany, ManyToOne } from 'typeorm'
 import { Content } from './Content'
 
+/**
+ * Check if an object is a word.
+ *
+ * @param input The object to check.
+ *
+ * @return True if the object is a word, false otherwise.
+ */
+export function isWord(input: any): input is Word {
+  return input instanceof Word
+}
+
 @Entity({
   name: 'Words'
 })

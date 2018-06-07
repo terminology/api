@@ -11,7 +11,7 @@ export let UserRouter = new Router({
 
 UserRouter.post('/', controller.create.bind(controller))
 
-// UserRouter.get('/', controller.find.bind(controller))
+UserRouter.get('/', controller.find.bind(controller))
 
 UserRouter.get('/:userId', controller.get.bind(controller))
 

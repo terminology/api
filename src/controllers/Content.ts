@@ -244,7 +244,7 @@ export abstract class ContentController<
     return ContentController.Transformer.plainToClass<CreateOneOptions, object>(
       this.createOneOptions,
       context.request.body,
-      this._buildTransformOptions(context)
+      this._buildDecodeTransformOptions(context)
     )
   }
 
@@ -261,7 +261,7 @@ export abstract class ContentController<
       {
         id: context.params.contentId
       },
-      this._buildTransformOptions(context)
+      this._buildDecodeTransformOptions(context)
     )
   }
 
@@ -279,7 +279,7 @@ export abstract class ContentController<
         skip: context.query.skip || 0,
         take: context.query.take || 10,
       },
-      this._buildTransformOptions(context)
+      this._buildDecodeTransformOptions(context)
     )
   }
 
@@ -298,18 +298,18 @@ export abstract class ContentController<
         context.request.body,
         { id: context.params.contentId }
       ),
-      this._buildTransformOptions(context)
+      this._buildDecodeTransformOptions(context)
     )
   }
 
   /**
-   * Build the options for the class transformer.
+   * Build the options for the class transformer when decoding request data.
    *
    * @param context The application context.
    *
    * @return The transform options.
    */
-  protected _buildTransformOptions(context: Context): Transformer.ClassTransformOptions {
+  protected _buildDecodeTransformOptions(context: Context): Transformer.ClassTransformOptions {
     return {
       groups: context.user ? [ context.user.role ] : [ 'contributor' ]
     }

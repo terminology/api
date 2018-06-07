@@ -1,6 +1,17 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToOne, JoinColumn, RelationId } from 'typeorm'
 import { User } from './User'
 
+/**
+ * Check if an object is an event.
+ *
+ * @param input The object to check.
+ *
+ * @return True if the object is an event, false otherwise.
+ */
+export function isEvent(input: any): input is Event {
+  return input instanceof Event
+}
+
 @Entity({
   name: 'Events'
 })

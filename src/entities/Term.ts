@@ -3,9 +3,15 @@ import { Content } from './Content'
 import { Connection } from './Connection'
 import { Word } from './Word'
 
-export enum POS {
-  Noun = 'noun',
-  Verb = 'verb'
+/**
+ * Check if an object is a term.
+ *
+ * @param input The object to check.
+ *
+ * @return True if the object is a term, false otherwise.
+ */
+export function isTerm(input: any): input is Term {
+  return input instanceof Term
 }
 
 @Entity({

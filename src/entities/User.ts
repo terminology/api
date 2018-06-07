@@ -13,6 +13,17 @@ export enum UserRole {
   Contributor = 'contributor'
 }
 
+/**
+ * Check if an object is a user.
+ *
+ * @param input The object to check.
+ *
+ * @return True if the object is a user, false otherwise.
+ */
+export function isUser(input: any): input is User {
+  return input instanceof User
+}
+
 @Entity({
   name: 'Users'
 })
@@ -22,22 +33,26 @@ export class User {
   id: number
 
   @Column()
+  @Transformer.Expose({ groups: [ 'owner', 'admin' ]})
   state: UserState = UserState.Pending
 
   @Column()
+  @Transformer.Expose({ groups: [ 'owner', 'admin' ]})
   role: UserRole = UserRole.Contributor
 
   @Column()
   name: string
 
   @Column()
+  @Transformer.Expose({ groups: [ 'owner', 'admin' ]})
   email: string
 
   @Column({ type: 'datetime', nullable: true })
+  @Transformer.Expose({ groups: [ 'owner', 'admin' ]})
   emailConfirmedAt?: Date
 
   @Column({ select: false })
-  @Transformer.Exclude()
+  @Transformer.Expose({ groups: [ 'admin' ]})
   emailConfirmationToken?: string = undefined
 
   @Column()
@@ -45,33 +60,41 @@ export class User {
   passwordHash?: string
 
   @Column({ type: 'datetime', nullable: true })
+  @Transformer.Expose({ groups: [ 'owner', 'admin' ]})
   passwordResetAt?: Date
 
   @Column()
-  @Transformer.Exclude()
+  @Transformer.Expose({ groups: [ 'admin' ]})
   passwordResetToken?: string = ''
 
   @Column({ type: 'datetime', nullable: true })
+  @Transformer.Expose({ groups: [ 'owner', 'admin' ]})
   lastAuthenticatedAt?: Date
 
   @Column({ type: 'datetime' })
+  @Transformer.Expose({ groups: [ 'owner', 'admin' ]})
   createdAt: Date
 
   @OneToOne(type => User, { nullable: true })
   @JoinColumn()
+  @Transformer.Expose({ groups: [ 'owner', 'admin' ]})
   createdBy?: User
 
   @RelationId((user: User) => user.createdBy)
+  @Transformer.Expose({ groups: [ 'owner', 'admin' ]})
   createdById?: number
 
   @Column({ type: 'datetime', nullable: true })
+  @Transformer.Expose({ groups: [ 'owner', 'admin' ]})
   lastUpdatedAt?: Date
 
   @OneToOne(type => User, { nullable: true })
   @JoinColumn()
+  @Transformer.Expose({ groups: [ 'owner', 'admin' ]})
   lastUpdatedBy?: User
 
   @RelationId((user: User) => user.lastUpdatedBy)
+  @Transformer.Expose({ groups: [ 'owner', 'admin' ]})
   lastUpdatedById?: number
 
   /**

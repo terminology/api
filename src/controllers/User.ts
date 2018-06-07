@@ -3,7 +3,7 @@ import * as lodash from 'lodash'
 import { Context } from 'koa'
 import { OperationController } from './Operation'
 import * as ORM from 'typeorm'
-import { User } from '../entities/User'
+import { User, isUser } from '../entities/User'
 import * as Ops from '../operations/User'
 
 /**
@@ -182,7 +182,7 @@ export class UserController extends OperationController {
     return UserController.Transformer.plainToClass<Ops.CreateUserOptions, object>(
       Ops.CreateUserOptions,
       context.request.body,
-      this._buildTransformOptions(context)
+      this._buildDecodeTransformOptions(context)
     )
   }
 
@@ -199,7 +199,7 @@ export class UserController extends OperationController {
       {
         token: context.params.token
       },
-      this._buildTransformOptions(context)
+      this._buildDecodeTransformOptions(context)
     )
   }
 
@@ -216,7 +216,7 @@ export class UserController extends OperationController {
       {
         id: context.params.userId
       },
-      this._buildTransformOptions(context)
+      this._buildDecodeTransformOptions(context)
     )
   }
 
@@ -234,7 +234,7 @@ export class UserController extends OperationController {
         skip: context.query.skip || 0,
         take: context.query.take || 10,
       },
-      this._buildTransformOptions(context)
+      this._buildDecodeTransformOptions(context)
     )
   }
 
@@ -253,20 +253,42 @@ export class UserController extends OperationController {
         context.request.body,
         { id: context.params.userId }
       ),
-      this._buildTransformOptions(context)
+      this._buildDecodeTransformOptions(context)
     )
   }
 
   /**
-   * Build the options for the class transformer.
+   * Build the options for the class transformer when decoding request data.
    *
    * @param context The application context.
    *
    * @return The transform options.
    */
-  protected _buildTransformOptions(context: Context): Transformer.ClassTransformOptions {
+  protected _buildDecodeTransformOptions(context: Context): Transformer.ClassTransformOptions {
     return {
       groups: context.user ? [ context.user.role ] : [ 'contributor' ]
+    }
+  }
+
+  /**
+   * Build the options for the class transformer when encoding response data.
+   *
+   * @param context The application context.
+   *
+   * @return The transform options.
+   */
+  protected _buildEncodeTransformOptions(context: Context, body: any): Transformer.ClassTransformOptions {
+
+    // Initialize the basic groups.
+    let groups = context.user ? [ context.user.role ] : [ 'contributor' ]
+
+    // Check if the current user is the user being accessed.
+    if (isUser(body) && context.user && body.id === context.user.id) {
+      groups.push('owner')
+    }
+
+    return {
+      groups: groups
     }
   }
 }

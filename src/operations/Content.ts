@@ -5,6 +5,9 @@ import { Context } from 'koa'
 import { Operation } from './Operation'
 import * as ORM from 'typeorm'
 import { Content, ContentState } from '../entities/Content'
+import { User } from '../entities/User'
+import { Paths, expandPaths, collapsePaths, Populater, Populaters } from '../helpers/Entity'
+import * as UOps from './User'
 
 /**
  * Options for creating a content item.
@@ -38,46 +41,21 @@ export abstract class CreateContentsOptions<C extends Content> {
 export abstract class FindContentOptions<C extends Content> implements ORM.FindOneOptions<C> {
 
   /**
-   * Specifies what columns should be retrieved.
-   */
-  select?: (keyof C)[]
-
-  /**
    * Simple condition that should be applied to match entities.
    */
+  @Validator.Allow()
   where?: ORM.FindConditions<C> | ORM.ObjectLiteral | string
 
   /**
    * Indicates what relations of entity should be loaded (simplified left join form).
    */
+  @Validator.Allow()
   relations?: string[]
-
-  /**
-   * Specifies what relations should be loaded.
-   */
-  join?: ORM.JoinOptions
 
   /**
    * Order, in which entities should be ordered.
    */
   order?: { [P in keyof C]?: "ASC" | "DESC" | 1 | -1 }
-
-  /**
-   * Enables or disables query result caching.
-   */
-  cache?: boolean | number | { id: any, milliseconds: number }
-
-  /**
-   * If sets to true then loads all relation ids of the entity and maps them into relation values (not relation objects).
-   * If array of strings is given then loads only relation ids of the given properties.
-   */
-  loadRelationIds?: boolean | { relations?: string[], disableMixedMap?: boolean } // todo: extract options into separate interface, reuse
-
-  /**
-   * Indicates if eager relations should be loaded or not.
-   * By default they are loaded when find methods are used.
-   */
-  loadEagerRelations?: boolean
 }
 
 /**
@@ -134,6 +112,9 @@ export abstract class GetContentOptions<C extends Content> {
   @Validator.IsInt()
   @Transformer.Type(() => Number)
   id: number
+
+  @Validator.Allow()
+  relations?: string[] = []
 }
 
 /**
@@ -141,6 +122,9 @@ export abstract class GetContentOptions<C extends Content> {
  */
 export abstract class GetContentsOptions<C extends Content> {
   ids: number[]
+
+  @Validator.Allow()
+  relations?: string[] = []
 }
 
 /**
@@ -250,7 +234,7 @@ export abstract class FindContents<C extends Content, O extends FindContentsOpti
    * @return The content items.
    */
   protected async _execute(manager: ORM.EntityManager, context: Context): Promise<C[]> {
-    return manager.find(this.type, this.options)
+    return manager.find(this.type, this.options as ORM.FindManyOptions<C>)
   }
 }
 
@@ -275,10 +259,53 @@ export abstract class FindCreateContents<
 > extends ContentOperation<O, C[]> {}
 
 /**
+ * Populate the created by user for a content item.
+ *
+ * @param manager   The entity manager.
+ * @param context   The application context.
+ * @param content   The content item.
+ * @param relations The sub-relations to populate.
+ *
+ * @return The content item.
+ */
+export async function populateCreatedBy<C extends Content>(manager: ORM.EntityManager, context: Context, content: C, relations?: string[]): Promise<User | undefined> {
+
+  // Check if a created by user exists.
+  if (!content.createdById) {
+    return undefined
+  }
+
+  // Get the created by user.
+  return new UOps.GetUser({ id: content.createdById }).execute(manager, context)
+}
+
+/**
+ * Populate the last updated by user for a content item.
+ *
+ * @param manager   The entity manager.
+ * @param context   The application context.
+ * @param content   The content item.
+ * @param relations The sub-relations to populate.
+ *
+ * @return The content item.
+ */
+export async function populateLastUpdatedBy<C extends Content>(manager: ORM.EntityManager, context: Context, content: C, relations?: string[]): Promise<User | undefined> {
+
+  // Check if a last updated by user exists.
+  if (!content.lastUpdatedById) {
+    return undefined
+  }
+
+  // Get the last updated by user.
+  return await new UOps.GetUser({ id: content.lastUpdatedById }).execute(manager, context)
+}
+
+/**
  * Get a content item.
  */
 export abstract class GetContent<C extends Content, O extends GetContentOptions<C>> extends ContentOperation<O, C | undefined> {
   protected type: ORM.ObjectType<C>
+  protected populaters: Populaters<C>
 
   /**
    * Instantiate a find content operation.
@@ -289,6 +316,10 @@ export abstract class GetContent<C extends Content, O extends GetContentOptions<
   constructor(options: O, type: ORM.ObjectType<C>) {
     super(options)
     this.type = type
+    this.populaters = {
+      createdBy: populateCreatedBy,
+      lastUpdatedBy: populateLastUpdatedBy
+    }
   }
 
   /**
@@ -300,7 +331,47 @@ export abstract class GetContent<C extends Content, O extends GetContentOptions<
    * @return The content item or undefined.
    */
   protected async _execute(manager: ORM.EntityManager, context: Context): Promise<C | undefined> {
-    return manager.findOne(this.type, { where: { id: this.options.id }})
+
+    // Get the content item.
+    let content = await manager.findOne(this.type, { where: { id: this.options.id } })
+
+    // Check if the content was not found or there are no relations to populate.
+    if (!content || !this.options.relations || lodash.isEmpty(this.options.relations)) {
+      return content
+    }
+
+    // Convert nested relations into structured paths.
+    let populate = expandPaths(this.options.relations)
+
+    // Populate each relation specified.
+    let promises = lodash.map(
+      populate,
+      (paths: Paths, key: string) => {
+
+        // Check if a populater is specified for the relation.
+        if (!this.populaters[key] || !content) {
+          return Promise.resolve(content)
+        }
+
+        // Populate the relation for the content item.
+        return this.populaters[key](manager, context, content, collapsePaths(paths))
+      }
+    )
+
+    // Wait for all relations to populate.
+    let results = await Promise.all(promises)
+
+    // Merge the populated properties into the content item.
+    content = lodash.reduce(
+      lodash.zipObject(Object.keys(populate), results),
+      (content, populated, key) => {
+        content[key] = populated
+        return content
+      },
+      content
+    )
+
+    return content
   }
 }
 
@@ -330,7 +401,7 @@ export abstract class GetContents<C extends Content, O extends GetContentsOption
    * @return The list of content items.
    */
   protected async _execute(manager: ORM.EntityManager, context: Context): Promise<C[]> {
-    return manager.find(this.type, { where: { id: this.options.ids }})
+    return manager.find(this.type, { where: { id: this.options.ids } })
   }
 }
 

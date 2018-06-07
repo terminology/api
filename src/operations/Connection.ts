@@ -77,35 +77,6 @@ export class CreateConnection extends COps.CreateContent<Connection, CreateConne
   }
 }
 
-// /**
-//  * Create a list of connections.
-//  */
-// export class CreateConnections extends COps.CreateContents<Connection, CreateConnectionsOptions> {
-//
-//   /**
-//    * Create a list of connections.
-//    *
-//    * @param manager The entity manager.
-//    * @param context The application context.
-//    *
-//    * @return The created connections.
-//    */
-//   protected async _execute(manager: ORM.EntityManager, context: Context): Promise<Connection[]> {
-//
-//     // Create the connections.
-//     const connections = this.options.names.map(name => {
-//       return manager.create(Connection, {
-//         state: this.options.state || ContentState.Draft,
-//         createdAt: new Date(),
-//         createdBy: context.user,
-//       })
-//     })
-//
-//     // Save the connections.
-//     return manager.save(Connection, connections)
-//   }
-// }
-
 /**
  * Find a connection.
  */
@@ -123,74 +94,6 @@ export class FindConnections extends COps.FindContents<Connection, FindConnectio
     super(options, Connection)
   }
 }
-
-// /**
-//  * Find or create a connection.
-//  */
-// export class FindCreateConnection extends COps.FindCreateContent<Connection, FindConnectionOptions, CreateConnectionOptions, FindCreateConnectionOptions> {
-//
-//   /**
-//    * Find or create a connection.
-//    *
-//    * @param manager The entity manager.
-//    * @param context The application context.
-//    *
-//    * @return The found/created connection.
-//    */
-//   protected async _execute(manager: ORM.EntityManager, context: Context): Promise<Connection> {
-//
-//     const slug = Lang.slugify(this.options.create.name)
-//
-//     // Try to find an existing connection.
-//     let existing = await new FindConnection(
-//       Object.assign({}, this.options.find, { where: { slug: slug }, relations: [ 'words', 'variants' ] })
-//     ).execute(manager, context)
-//
-//     // Check if the connection exists.
-//     if (existing) {
-//       return existing
-//     }
-//
-//     // Create the connection.
-//     return new CreateConnection(this.options.create).execute(manager, context)
-//   }
-// }
-
-// /**
-//  * Find or create a list of connections.
-//  */
-// export class FindCreateConnections extends COps.FindCreateContents<Connection, FindConnectionsOptions, CreateConnectionsOptions, FindCreateConnectionsOptions> {
-//
-//   /**
-//    * Find or create a list of connections.
-//    *
-//    * @param manager The entity manager.
-//    * @param context The application context.
-//    *
-//    * @return The found/created list of connections.
-//    */
-//   protected async _execute(manager: ORM.EntityManager, context: Context): Promise<Connection[]> {
-//
-//     // Index the connection name to the slug.
-//     const slugMap = lodash.keyBy(this.options.create.names, (name) => Lang.slugify(name))
-//
-//     // Find the existing connections.
-//     const existing = await new FindConnections({ where: { slug: ORM.In(lodash.keys(slugMap)) } }).execute(manager, context)
-//
-//     // Index existing connections by slug.
-//     const existingMap = lodash.keyBy(existing, 'slug')
-//
-//     // Find the missing connections by slug.
-//     const missingSlugs = lodash.difference(lodash.keys(slugMap), lodash.keys(existingMap))
-//     const missingConnections = lodash.values(lodash.pick(slugMap, missingSlugs))
-//
-//     // Create the missing connections.
-//     const created = await new CreateConnections({ names: missingConnections }).execute(manager, context)
-//
-//     // Merge created and existing.
-//     return created.concat(existing)
-//   }
-// }
 
 /**
  * Get a connection.

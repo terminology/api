@@ -211,10 +211,15 @@ export class UserController extends OperationController {
    * @return The options to get a user.
    */
   protected _buildGetUserOptions(context: Context): Ops.GetUserOptions {
+
+    // Get the relations to populate.
+    const relations = context.query.relations ? context.query.relations.split(/,/g) : []
+
     return UserController.Transformer.plainToClass<Ops.GetUserOptions, object>(
       Ops.GetUserOptions,
       {
-        id: context.params.userId
+        id: context.params.userId,
+        relations: relations,
       },
       this._buildDecodeTransformOptions(context)
     )
@@ -228,11 +233,16 @@ export class UserController extends OperationController {
    * @return The options to find a list of users.
    */
   protected _buildFindUsersOptions(context: Context): Ops.FindUsersOptions {
+
+    // Get the relations to populate.
+    const relations = context.query.relations ? context.query.relations.split(/,/g) : []
+
     return UserController.Transformer.plainToClass<Ops.FindUsersOptions, object>(
       Ops.FindUsersOptions,
       {
         skip: context.query.skip || 0,
         take: context.query.take || 10,
+        relations: relations,
       },
       this._buildDecodeTransformOptions(context)
     )

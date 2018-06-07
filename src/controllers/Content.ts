@@ -256,10 +256,15 @@ export abstract class ContentController<
    * @return The options to get a content item.
    */
   protected _buildGetOneOptions(context: Context): GetOneOptions {
+
+    // Get the relations to populate.
+    const relations = context.query.relations ? context.query.relations.split(/,/g) : []
+
     return ContentController.Transformer.plainToClass<GetOneOptions, object>(
       this.getOneOptions,
       {
-        id: context.params.contentId
+        id: context.params.contentId,
+        relations: relations,
       },
       this._buildDecodeTransformOptions(context)
     )
@@ -273,11 +278,16 @@ export abstract class ContentController<
    * @return The options to find a list of content items.
    */
   protected _buildFindManyOptions(context: Context): FindManyOptions {
+
+    // Get the relations to populate.
+    const relations = context.query.relations ? context.query.relations.split(/,/g) : []
+
     return ContentController.Transformer.plainToClass<FindManyOptions, object>(
       this.findManyOptions,
       {
         skip: context.query.skip || 0,
         take: context.query.take || 10,
+        relations: relations,
       },
       this._buildDecodeTransformOptions(context)
     )

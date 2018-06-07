@@ -6,7 +6,9 @@ import * as Lang from '../helpers/Lang'
 import { Context } from 'koa'
 import { Content, ContentState } from '../entities/Content'
 import { Term } from '../entities/Term'
+import { Connection } from '../entities/Connection'
 import * as WOps from './Word'
+import * as CxOps from './Connection'
 
 export class CreateTermOptions extends COps.CreateContentOptions<Term> {
 
@@ -29,6 +31,21 @@ export class GetTermOptions extends COps.GetContentOptions<Term> {}
 export class GetTermsOptions extends COps.GetContentsOptions<Term> {}
 export class UpdateTermOptions extends COps.UpdateContentOptions<Term> {}
 export class UpdateTermsOptions extends COps.UpdateContentsOptions<Term> {}
+
+/**
+ * Populate the connections for a term.
+ *
+ * @param manager The entity manager.
+ * @param context The application context.
+ * @param content The term.
+ *
+ * @return The term.
+ */
+export async function populateConnections(manager: ORM.EntityManager, context: Context, term: Term, relations?: string[]): Promise<Connection[]> {
+
+  // Get the connections.
+  return new CxOps.FindConnections({ where: { term: term.id }, relations: relations }).execute(manager, context)
+}
 
 /**
  * Create a term.
@@ -161,7 +178,7 @@ export class FindCreateTerm extends COps.FindCreateContent<Term, FindTermOptions
 
     // Try to find an existing term.
     let existing = await new FindTerm(
-      Object.assign({}, this.options.find, { where: { slug: slug }, relations: [ 'words', 'variants' ] })
+      Object.assign({}, this.options.find, { where: { slug: slug }, relations: this.options.find ? this.options.find.relations || [] : [] })
     ).execute(manager, context)
 
     // Check if the term exists.
@@ -216,6 +233,7 @@ export class FindCreateTerms extends COps.FindCreateContents<Term, FindTermsOpti
 export class GetTerm extends COps.GetContent<Term, COps.GetContentOptions<Term>> {
   constructor(options: COps.GetContentOptions<Term>) {
     super(options, Term)
+    this.populaters.connections = populateConnections
   }
 }
 

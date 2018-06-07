@@ -61,6 +61,11 @@ export class CreateUserOptions {
   @Transformer.Exclude({ toPlainOnly: true })
   password: string
 
+  @Validator.Equals(true, {
+    message: 'You must agree to the Terms of Service.'
+  })
+  tos: boolean
+
   @Transformer.Expose({ groups: [ 'admin' ]})
   @Validator.ValidateIf(o => !!o.state)
   @Validator.IsEnum(UserState, {

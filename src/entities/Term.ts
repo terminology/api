@@ -21,7 +21,15 @@ export class Term extends Content {
 
   @ManyToMany(type => Word)
   @JoinTable({
-    name: 'TermWords'
+    name: 'TermWords',
+    joinColumn: {
+      name: 'termId',
+      referencedColumnName: 'id'
+    },
+    inverseJoinColumn: {
+      name: 'wordId',
+      referencedColumnName: 'id'
+    }
   })
   words: Word[]
 

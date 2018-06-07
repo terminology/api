@@ -1,6 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToOne, JoinColumn, RelationId } from 'typeorm'
 import { Content } from './Content'
-import ModelHelper from '../helpers/Model'
+import * as Transformer from 'class-transformer'
 
 export enum UserState {
   Pending = 'pending',
@@ -37,18 +37,18 @@ export class User {
   emailConfirmedAt?: Date
 
   @Column({ select: false })
-  @ModelHelper.Transformer.Exclude()
+  @Transformer.Exclude()
   emailConfirmationToken?: string = undefined
 
   @Column()
-  @ModelHelper.Transformer.Exclude()
+  @Transformer.Exclude()
   passwordHash?: string
 
   @Column({ type: 'datetime', nullable: true })
   passwordResetAt?: Date
 
   @Column()
-  @ModelHelper.Transformer.Exclude()
+  @Transformer.Exclude()
   passwordResetToken?: string = ''
 
   @Column({ type: 'datetime', nullable: true })

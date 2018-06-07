@@ -16,6 +16,11 @@ export class CreateUsageOptions extends COps.CreateContentOptions<Usage> {
     message: 'Name cannot be more than 255 characters.'
   })
   name: string
+
+  @Validator.MinLength(1, {
+    message: 'Summary must be at least 1 characters.'
+  })
+  summary: string
 }
 export class CreateUsagesOptions extends COps.CreateContentsOptions<Usage> {
   names: string[]
@@ -48,6 +53,7 @@ export class CreateUsage extends COps.CreateContent<Usage, CreateUsageOptions> {
     const usage = manager.create(Usage, {
       name: this.options.name,
       slug: Lang.slugify(this.options.name),
+      summary: this.options.summary,
       state: this.options.state || ContentState.Draft,
       createdAt: new Date(),
       createdBy: context.user,

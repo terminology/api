@@ -92,11 +92,6 @@ export class ConfirmUserEmailOptions {
 export class FindUserOptions implements ORM.FindOneOptions<User> {
 
   /**
-   * Specifies what columns should be retrieved.
-   */
-  select?: (keyof User)[]
-
-  /**
    * Simple condition that should be applied to match entities.
    */
   where?: ORM.FindConditions<User> | ORM.ObjectLiteral | string
@@ -104,34 +99,8 @@ export class FindUserOptions implements ORM.FindOneOptions<User> {
   /**
    * Indicates what relations of entity should be loaded (simplified left join form).
    */
+  @Validator.Allow()
   relations?: string[]
-
-  /**
-   * Specifies what relations should be loaded.
-   */
-  join?: ORM.JoinOptions
-
-  /**
-   * Order, in which entities should be ordered.
-   */
-  order?: { [P in keyof User]?: "ASC" | "DESC" | 1 | -1 }
-
-  /**
-   * Enables or disables query result caching.
-   */
-  cache?: boolean | number | { id: any, milliseconds: number }
-
-  /**
-   * If sets to true then loads all relation ids of the entity and maps them into relation values (not relation objects).
-   * If array of strings is given then loads only relation ids of the given properties.
-   */
-  loadRelationIds?: boolean | { relations?: string[], disableMixedMap?: boolean } // todo: extract options into separate interface, reuse
-
-  /**
-   * Indicates if eager relations should be loaded or not.
-   * By default they are loaded when find methods are used.
-   */
-  loadEagerRelations?: boolean
 }
 
 /**
@@ -164,6 +133,9 @@ export class GetUserOptions {
   @Validator.IsInt()
   @Transformer.Type(() => Number)
   id: number
+
+  @Validator.Allow()
+  relations?: string[] = []
 }
 
 /**
@@ -171,6 +143,9 @@ export class GetUserOptions {
  */
 export class GetUsersOptions {
   ids: number[]
+
+  @Validator.Allow()
+  relations?: string[] = []
 }
 
 /**

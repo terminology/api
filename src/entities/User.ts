@@ -57,7 +57,7 @@ export class User {
 
   @Column()
   @Transformer.Exclude()
-  passwordHash?: string
+  passwordHash: string
 
   @Column({ type: 'datetime', nullable: true })
   @Transformer.Expose({ groups: [ 'owner', 'admin' ]})

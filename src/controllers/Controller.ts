@@ -23,7 +23,7 @@ export class Controller {
   protected json(context: Context, status: number = 200, body: any) {
     context.status = status || 200
     context.type = 'application/json'
-    context.body = Controller.Transformer.classToPlain(body, this._buildEncodeTransformOptions(context, body))
+    context.body = Transformer.classToPlain(body, this._buildEncodeTransformOptions(context, body))
   }
 
   /**
@@ -36,6 +36,19 @@ export class Controller {
 
     // TODO: This should do something more useful with the error messages.
     ctx.throw(422, errors[0])
+  }
+
+  /**
+   * Build the options for the class transformer when decoding request data.
+   *
+   * @param context The application context.
+   *
+   * @return The transform options.
+   */
+  protected _buildDecodeTransformOptions(context: Context): Transformer.ClassTransformOptions {
+    return {
+      groups: context.user ? [ context.user.role ] : [ 'contributor' ]
+    }
   }
 
   /**

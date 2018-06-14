@@ -297,7 +297,7 @@ export async function populateLastUpdatedBy<C extends Content>(manager: ORM.Enti
   }
 
   // Get the last updated by user.
-  return await new UOps.GetUser({ id: content.lastUpdatedById }).execute(manager, context)
+  return new UOps.GetUser({ id: content.lastUpdatedById }).execute(manager, context)
 }
 
 /**

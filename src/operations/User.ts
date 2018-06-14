@@ -241,7 +241,7 @@ export class AuthenticateUser extends Operation<AuthenticateUserOptions, User | 
     user = manager.merge(User, user, { lastAuthenticatedAt: new Date() })
 
     // Save the updated user.
-    return await manager.save(User, user)
+    return manager.save(User, user)
   }
 }
 
@@ -330,7 +330,7 @@ export class ConfirmUserEmail extends Operation<ConfirmUserEmailOptions, User | 
     )
 
     // Save the updated user.
-    return await manager.save(User, user)
+    return manager.save(User, user)
   }
 }
 
